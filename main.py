@@ -181,7 +181,7 @@ if __name__ == "__main__":
     if param.gpus not in ["0","1","0,1"]:
         raise ValueError("Invalid gpu id ",param.gpus)
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = "%s"%(dataset.gpus)
+    os.environ["CUDA_VISIBLE_DEVICES"] = "%s"%(param.gpus)
 
     train_sigma_list=get_sigma_list(reg_type)
 
