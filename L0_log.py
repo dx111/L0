@@ -122,16 +122,15 @@ class csv_logger(keras.callbacks.Callback):
             (key, handle_value(logs[key])) for key in self.keys)
 
     def on_train_end(self, logs=None):
-        # all_weight = self.model.get_weights()
-        model_save_path = "log/%s/%d" % (self.section, self.k_fold_index)
-        if not os.path.exists(model_save_path):
-            os.makedirs(model_save_path)
-        all_weight=self.model.get_weights()
+        all_weight = self.model.get_weights()
+        weight_save_path = "log/%s/%d" % (self.section, self.k_fold_index)
+        if not os.path.exists(weight_save_path):
+            os.makedirs(weight_save_path)
+    
         for ind, weight in enumerate(all_weight):
             if ind % 2 == 0:
                 weight = np.rint((weight * 1000.0)) / 1000.0
-                np.savetxt(weight_save_path+"/layer_%d.txt" % ((ind/2)+1), weight,
-                           header="shape [%d,%d]" % (weight.shape[0], weight.shape[1]))
+                np.save(weight_save_path+"/layer_%d.npy" % ((ind/2)+1), weight,)
         self.writer.writerow(self.row_dict)
         self.csv_file.flush()
         self.csv_file.close()

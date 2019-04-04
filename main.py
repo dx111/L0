@@ -164,6 +164,8 @@ def get_sigma_list(reg_type):
 
 
 if __name__ == "__main__":
+    MAX_ITERATION_TIES=20
+    
     """   argparse   """
     parser = argparse.ArgumentParser(description="for example: python --dataset mnist --type type1 --gpus 0,1")
     parser.add_argument('--dataset',type=str,dest="dataset",help="provide mnist,sdd,covtype")
@@ -185,7 +187,7 @@ if __name__ == "__main__":
 
     train_sigma_list=get_sigma_list(reg_type)
 
-    lambda_value_base=[0.00001, 1]
+    lambda_value_base=[0.00001, 0.0005]
 
     benchmark_acc,benchmark_val_acc,benchmark_neurons_sum,benchmark_sparse_sum=get_benchmark(dataset)
 
@@ -201,15 +203,20 @@ if __name__ == "__main__":
 
     for sigma_value in train_sigma_list:
         flag_fine_tuning=False
+        Iteration_times=0
         lambda_value = lambda_value_base
         while True:
             if flag_fine_tuning is False:
+                Iteration_times+=1
                 med_lambda = (lambda_value[0]+lambda_value[1])/2.0
                 lambda_array = [med_lambda, med_lambda, med_lambda, med_lambda]
-                if abs(lambda_value[1]-lambda_value[0]) > 0.0001:
+                if Iteration_times <MAX_ITERATION_TIES:
                     config = generate_cfg(data=dataset, reg_type=reg_type,sigma_value=sigma_value, lambda_scope=lambda_array)
                     acc, val_acc, neurons, spares = train_loop(config)
                     neurons_sum = sum(neurons)
+                    if Iteration_times == MAX_ITERATION_TIES-1:
+                        result_writer.writerow([acc,val_acc, sigma_value, lambda_array[0],neurons[0], neurons[1], neurons[2], neurons[3],spares[0], spares[1], spares[2], spares[3]])
+                        file_handle.flush()
                     if val_acc <= benchmark_val_acc:
                         lambda_value = [lambda_value[0], med_lambda]
                     elif neurons_sum > benchmark_neurons_sum:
@@ -220,6 +227,7 @@ if __name__ == "__main__":
                         lambda_value=np.linspace(lambda_value[0],lambda_value[1],20).tolist()[1:-1]
                         flag_fine_tuning=True
                 else:
+
                     break
    
             elif flag_fine_tuning is True:
