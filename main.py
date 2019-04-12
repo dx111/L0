@@ -153,9 +153,9 @@ def get_benchmark(data_set):
 
 def get_sigma_list(reg_type):
     if reg_type=="type1":
-        train_sigma_list=np.linspace(0.0001,0.0009,5).tolist()+np.linspace(0.001,0.009,5).tolist()+np.linspace(0.01,0.09,5).tolist()+np.linspace(0.1,0.9,5).tolist()
+        train_sigma_list=np.linspace(0.00001,0.00009,5).tolist()+np.linspace(0.0001,0.0009,5).tolist()+np.linspace(0.001,0.009,5).tolist()+np.linspace(0.01,0.09,5).tolist()
     elif reg_type=="type2":
-        train_sigma_list=np.linspace(0.0001,0.0009,5).tolist()+np.linspace(0.001,0.009,5).tolist()+np.linspace(0.01,0.09,5).tolist()+np.linspace(0.1,0.9,5).tolist()
+        train_sigma_list=np.linspace(0.00001,0.00009,5).tolist()+np.linspace(0.0001,0.0009,5).tolist()+np.linspace(0.001,0.009,5).tolist()+np.linspace(0.01,0.09,5).tolist()
     elif reg_type=="type3":
         train_sigma_list = [1,1/2,1/3,1/4,1/5]
     elif reg_type=="type4":
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     dataset = param.dataset
     if dataset not in ["mnist","sdd","covtype"]:
         raise ValueError("Invalid dataset name ,please choice one of the [mnist,sdd,covtype].",dataset)
-    reg_type=param.type = "type1"
+    reg_type=param.type
     if reg_type not in ["type1","type2","type3","type4"]:
         raise ValueError("Invalid regularization type ,please choice one of the [type1,type2,type3,type4].",reg_type)
     if param.gpus not in ["0","1","0,1"]:
@@ -187,7 +187,7 @@ if __name__ == "__main__":
 
     train_sigma_list=get_sigma_list(reg_type)
 
-    lambda_value_base=[0.00001, 0.0005]
+    lambda_value_base=[0.00001, 0.5]
 
     benchmark_acc,benchmark_val_acc,benchmark_neurons_sum,benchmark_sparse_sum=get_benchmark(dataset)
 
@@ -214,9 +214,6 @@ if __name__ == "__main__":
                     config = generate_cfg(data=dataset, reg_type=reg_type,sigma_value=sigma_value, lambda_scope=lambda_array)
                     acc, val_acc, neurons, spares = train_loop(config)
                     neurons_sum = sum(neurons)
-                    if Iteration_times == MAX_ITERATION_TIES-1:
-                        result_writer.writerow([acc,val_acc, sigma_value, lambda_array[0],neurons[0], neurons[1], neurons[2], neurons[3],spares[0], spares[1], spares[2], spares[3]])
-                        file_handle.flush()
                     if val_acc <= benchmark_val_acc:
                         lambda_value = [lambda_value[0], med_lambda]
                     elif neurons_sum > benchmark_neurons_sum:

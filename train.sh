@@ -1,1 +1,1 @@
-python main.py --dataset mnist --type type3 --gpus 0
+setsid python -u main.py --dataset sdd --type type4 --gpus 0 >1.log &
